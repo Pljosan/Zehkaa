@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Zehkaa.SpriteClasses;
+using Zehkaa.TerrainClasses;
 
 namespace Zehkaa
 {
@@ -8,6 +10,9 @@ namespace Zehkaa
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+
+        private ZehkaaSprite zehkaaHimself;
+        private GroundSprite groundSprite;
 
         public Game1()
         {
@@ -27,6 +32,15 @@ namespace Zehkaa
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            Texture2D zehkaaTexture = Content.Load<Texture2D>("elephantGoodSize");
+            Vector2 zehkaaStartPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2,
+                           _graphics.PreferredBackBufferHeight / 2);
+            float zehkaaSpeed = 200f;
+
+            zehkaaHimself = new ZehkaaSprite(zehkaaTexture, zehkaaStartPosition, zehkaaSpeed);
+
+            groundSprite = new GroundSprite(Content.Load<Texture2D>("grassGoodSize"), _graphics);
+
             // TODO: use this.Content to load your game content here
         }
 
@@ -36,6 +50,7 @@ namespace Zehkaa
                 Exit();
 
             // TODO: Add your update logic here
+            zehkaaHimself.Update(gameTime, groundSprite.GetBoundingBox());
 
             base.Update(gameTime);
         }
@@ -45,6 +60,10 @@ namespace Zehkaa
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+            _spriteBatch.Begin();
+            zehkaaHimself.Draw(_spriteBatch);
+            groundSprite.Draw(_spriteBatch, _graphics);
+            _spriteBatch.End();
 
             base.Draw(gameTime);
         }
