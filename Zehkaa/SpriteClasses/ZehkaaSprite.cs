@@ -20,8 +20,9 @@ namespace Zehkaa.SpriteClasses
         private float speed;
         private SpriteEffects spriteEffect;
         private Vector2 velocity;
+        private bool isOnGround = false;
 
-        private float gravity = 9.8f; //TODO: move this upwards so it's global
+        private float jumpStrength = -5f;
 
         private Rectangle boundingRectangle;
 
@@ -39,34 +40,32 @@ namespace Zehkaa.SpriteClasses
 
         public void Update(GameTime gameTime, Rectangle groundRectangle)
         {
-            // time elapse since last Update call
-            float updatedBallSpeed = speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-
+            float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            float updatedBallSpeed = speed * delta;
             var kstate = Keyboard.GetState();
 
-            if (ButtonPressUtils.IsMoveLeft(kstate))
-            {
-                position.X -= updatedBallSpeed;
-                spriteEffect = SpriteEffects.FlipHorizontally;
-            }
+            velocity.X = 0;
 
-            if (ButtonPressUtils.IsMoveRight(kstate))
-            {
-                position.X += updatedBallSpeed;
-                spriteEffect = SpriteEffects.None;
-            }
+            HandleMovement(kstate, updatedBallSpeed);
 
-            if (ButtonPressUtils.IsJump(kstate))
-            {
-                position.Y -= 2 * updatedBallSpeed;
-            }
+            HandleGravity(delta);
 
+            position += velocity;
+
+            HandleGroundTouch(kstate, groundRectangle);
+        }
+
+        private void HandleGravity(float delta)
+        {
+            if (!isOnGround)
+                velocity.Y += ConstantsUtil.GRAVITY * delta;
+        }
+
+        private void HandleGroundTouch(KeyboardState kstate, Rectangle groundRectangle)
+        {
             boundingRectangle = new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
 
-            velocity.Y += gravity * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            position.Y += velocity.Y;
-
-            if (boundingRectangle.Intersects(groundRectangle))
+            if (boundingRectangle.Bottom >= groundRectangle.Top)
             {
                 if (ButtonPressUtils.IsHoldLookDown(kstate))
                 {
@@ -77,10 +76,35 @@ namespace Zehkaa.SpriteClasses
                     texture = textureUp;
                 }
 
-                position.Y = groundRectangle.Top - texture.Height + 1; // + 1 is a hack to stop gravity from bouncing all the time
+                position.Y = groundRectangle.Top - texture.Height;
                 velocity.Y = 0;
+                isOnGround = true;
+            }
+            else
+            {
+                isOnGround = false;
+            }
+        }
+
+        private void HandleMovement(KeyboardState kstate, float updatedBallSpeed)
+        {
+            if (ButtonPressUtils.IsMoveLeft(kstate))
+            {
+                velocity.X = -updatedBallSpeed;
+                spriteEffect = SpriteEffects.FlipHorizontally;
             }
 
+            if (ButtonPressUtils.IsMoveRight(kstate))
+            {
+                velocity.X = updatedBallSpeed;
+                spriteEffect = SpriteEffects.None;
+            }
+
+            if (ButtonPressUtils.IsJump(kstate) && isOnGround)
+            {
+                velocity.Y = jumpStrength;
+                isOnGround = false;
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)

@@ -39,18 +39,7 @@ namespace Zehkaa.Utils
 
         public static bool IsJump(KeyboardState kstate)
         {
-            return kstate.IsKeyDown(Keys.Space) || ButtonState.Pressed.Equals(GamePad.GetState(PlayerIndex.One).Buttons.A);
-        }
-
-        private bool IsAnyOtherButtonPressed(KeyboardState kstate)
-        {
-            Keys[] keys = Keyboard.GetState().GetPressedKeys();
-            Keys pressedKey = Array.Find(keys, key => !key.Equals(Keys.Down) && !key.Equals(Keys.S));
-
-
-            Debug.WriteLine("Pressed: " + pressedKey);
-
-            return pressedKey != null;
+            return kstate.IsKeyDown(Keys.Space) || GamePad.GetState(PlayerIndex.One).Buttons.A == ButtonState.Pressed;
         }
     }
 }
