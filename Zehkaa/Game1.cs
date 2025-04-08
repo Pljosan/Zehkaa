@@ -33,11 +33,12 @@ namespace Zehkaa
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             Texture2D zehkaaTexture = Content.Load<Texture2D>("elephantGoodSize");
+            Texture2D zehkaaTextureDown = Content.Load<Texture2D>("elephantDown");
             Vector2 zehkaaStartPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2,
                            _graphics.PreferredBackBufferHeight / 2);
             float zehkaaSpeed = 200f;
 
-            zehkaaHimself = new ZehkaaSprite(zehkaaTexture, zehkaaStartPosition, zehkaaSpeed);
+            zehkaaHimself = new ZehkaaSprite(zehkaaTexture, zehkaaTextureDown, zehkaaStartPosition, zehkaaSpeed);
 
             groundSprite = new GroundSprite(Content.Load<Texture2D>("grassGoodSize"), _graphics);
 

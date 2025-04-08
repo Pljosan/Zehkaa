@@ -1,14 +1,20 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection.Metadata;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using SharpDX.XInput;
 
 namespace Zehkaa.SpriteClasses
 {
     internal class ZehkaaSprite
     {
         private Texture2D texture;
+        private Texture2D textureDown;
+        private Texture2D textureUp;
         private Vector2 position;
         private float speed;
         private SpriteEffects spriteEffect;
@@ -18,13 +24,16 @@ namespace Zehkaa.SpriteClasses
 
         private Rectangle boundingRectangle;
 
-        public ZehkaaSprite(Texture2D texture, Vector2 startPosition, float movementSpeed)
+        public ZehkaaSprite(Texture2D textureUp, Texture2D textureDown, Vector2 startPosition, float movementSpeed)
         {
-            this.texture = texture;
+            this.textureUp = textureUp;
+            this.textureDown = textureDown;
             this.position = startPosition;
             this.spriteEffect = SpriteEffects.None;
             this.speed = movementSpeed;
             this.velocity = Vector2.Zero;
+
+            this.texture = textureUp;
         }
 
         public void Update(GameTime gameTime, Rectangle groundRectangle)
@@ -34,28 +43,23 @@ namespace Zehkaa.SpriteClasses
 
             var kstate = Keyboard.GetState();
 
-            if (kstate.IsKeyDown(Keys.Left))
+            if (IsMoveLeft(kstate))
             {
                 position.X -= updatedBallSpeed;
                 spriteEffect = SpriteEffects.FlipHorizontally;
             }
 
-            if (kstate.IsKeyDown(Keys.Right))
+            if (IsMoveRight(kstate))
             {
                 position.X += updatedBallSpeed;
                 spriteEffect = SpriteEffects.None;
             }
 
-            if (kstate.IsKeyDown(Keys.Up))
+            if (IsJump(kstate))
             {
-                position.Y -= updatedBallSpeed;
+                position.Y -= 2 * updatedBallSpeed;
             }
 
-            if (kstate.IsKeyDown(Keys.Down))
-            {
-                position.Y += updatedBallSpeed;
-            }
-            
             boundingRectangle = new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
 
             velocity.Y += gravity * (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -63,6 +67,15 @@ namespace Zehkaa.SpriteClasses
 
             if (boundingRectangle.Intersects(groundRectangle))
             {
+                if (IsHoldLookDown(kstate))
+                {
+                    texture = textureDown;
+                }
+                else if (IsLetGoLookDown(kstate) || IsAnyOtherButtonPressed(kstate))
+                {
+                    texture = textureUp;
+                }
+
                 position.Y = groundRectangle.Top - texture.Height + 1; // + 1 is a hack to stop gravity from bouncing all the time
                 velocity.Y = 0;
             }
@@ -77,12 +90,54 @@ namespace Zehkaa.SpriteClasses
                 null,
                 Color.White,
                 0f,
-                //new Vector2(texture.Width / 2, texture.Height / 2),
                 Vector2.Zero,
                 Vector2.One,
                 spriteEffect,
                 0f
             );
         }
+
+        private bool IsMoveLeft(KeyboardState kstate)
+        {
+            return kstate.IsKeyDown(Keys.Left) || kstate.IsKeyDown(Keys.A) || (GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.X < -0.1f);
+        }
+
+        private bool IsMoveRight(KeyboardState kstate)
+        {
+            return kstate.IsKeyDown(Keys.Right) || kstate.IsKeyDown(Keys.D) || (GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.X > 0.1f);
+        }
+
+        private bool IsLookUp(KeyboardState kstate)
+        {
+            //TODO: Use this as looking up
+            return kstate.IsKeyDown(Keys.Up) || kstate.IsKeyDown(Keys.W) || (GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.Y > 0.1f);
+        }
+
+        private bool IsHoldLookDown(KeyboardState kstate)
+        {
+            return kstate.IsKeyDown(Keys.Down) || kstate.IsKeyDown(Keys.S) || (GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.Y < -0.1f);
+        }
+
+        private bool IsLetGoLookDown(KeyboardState kstate)
+        {
+            return kstate.IsKeyUp(Keys.Down) && kstate.IsKeyUp(Keys.S) && (GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.Y >= -0.1f);
+        }
+
+        private bool IsJump(KeyboardState kstate)
+        {
+            return kstate.IsKeyDown(Keys.Space) || ButtonState.Pressed.Equals(GamePad.GetState(PlayerIndex.One).Buttons.A);
+        }
+
+        private bool IsAnyOtherButtonPressed(KeyboardState kstate)
+        {
+            Keys[] keys = Keyboard.GetState().GetPressedKeys();
+            Keys pressedKey = Array.Find(keys, key => !key.Equals(Keys.Down) && !key.Equals(Keys.S));
+
+
+            Debug.WriteLine("Pressed: " + pressedKey);
+
+            return pressedKey != null;
+        }
+
     }
 }
