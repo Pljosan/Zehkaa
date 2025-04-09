@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 
@@ -40,6 +35,14 @@ namespace Zehkaa.Utils
         public static bool IsJump(KeyboardState kstate)
         {
             return kstate.IsKeyDown(Keys.Space) || GamePad.GetState(PlayerIndex.One).Buttons.A == ButtonState.Pressed;
+        }
+
+        internal static bool AnyOtherButtonThanDownPressed(KeyboardState kstate)
+        {
+            Keys key = Array.Find(kstate.GetPressedKeys(), key => !key.Equals(Keys.Down));
+            if (key.Equals(Keys.None)) return false;
+
+            return true;
         }
     }
 }

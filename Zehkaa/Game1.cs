@@ -13,6 +13,7 @@ namespace Zehkaa
 
         private ZehkaaSprite zehkaaHimself;
         private GroundSprite groundSprite;
+        private PlatformSprite movingPlatform;
 
         public Game1()
         {
@@ -42,6 +43,10 @@ namespace Zehkaa
 
             groundSprite = new GroundSprite(Content.Load<Texture2D>("grassGoodSize"), _graphics);
 
+            Vector2 platformPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2,
+                           groundSprite.GetBoundingBox().Top - 140f);
+            movingPlatform = new PlatformSprite(Content.Load<Texture2D>("grassGoodSize"), platformPosition, _graphics);
+
             // TODO: use this.Content to load your game content here
         }
 
@@ -51,7 +56,8 @@ namespace Zehkaa
                 Exit();
 
             // TODO: Add your update logic here
-            zehkaaHimself.Update(gameTime, groundSprite.GetBoundingBox());
+            zehkaaHimself.Update(gameTime, groundSprite.GetBoundingBox(), movingPlatform);
+            movingPlatform.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -64,6 +70,7 @@ namespace Zehkaa
             _spriteBatch.Begin();
             zehkaaHimself.Draw(_spriteBatch);
             groundSprite.Draw(_spriteBatch, _graphics);
+            movingPlatform.Draw(_spriteBatch, _graphics);
             _spriteBatch.End();
 
             base.Draw(gameTime);

@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection.Metadata;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using SharpDX.XInput;
+using Zehkaa.TerrainClasses;
 using Zehkaa.Utils;
 
 namespace Zehkaa.SpriteClasses
@@ -22,7 +19,7 @@ namespace Zehkaa.SpriteClasses
         private Vector2 velocity;
         private bool isOnGround = false;
 
-        private float jumpStrength = -5f;
+        private float jumpStrength = -8f;
 
         private Rectangle boundingRectangle;
 
@@ -38,21 +35,41 @@ namespace Zehkaa.SpriteClasses
             this.texture = textureUp;
         }
 
-        public void Update(GameTime gameTime, Rectangle groundRectangle)
+        //TODO: add this to array of world sprites?
+        public void Update(GameTime gameTime, Rectangle groundRectangle, PlatformSprite platform)
         {
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            float updatedBallSpeed = speed * delta;
+            float updatedSpeed = speed * delta;
             var kstate = Keyboard.GetState();
 
             velocity.X = 0;
 
-            HandleMovement(kstate, updatedBallSpeed);
+            HandleMovement(kstate, updatedSpeed);
 
             HandleGravity(delta);
 
             position += velocity;
 
             HandleGroundTouch(kstate, groundRectangle);
+            HandlePlatformTouch(kstate, platform);
+        }
+
+        private void HandlePlatformTouch(KeyboardState kstate, PlatformSprite platformSprite)
+        {
+
+            Rectangle platformRectangle = platformSprite.GetBoundingBox();
+            boundingRectangle = new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
+            if (boundingRectangle.Bottom <= platformRectangle.Top + 5 &&
+                boundingRectangle.Bottom >= platformRectangle.Top - 5 &&
+                boundingRectangle.Right > platformRectangle.Left &&
+                boundingRectangle.Left < platformRectangle.Right)
+            {
+                isOnGround = true;
+                velocity.Y = 0;
+
+                position.X += platformSprite.GetVelocity().X;
+                position.Y = platformRectangle.Top - texture.Height;
+            }
         }
 
         private void HandleGravity(float delta)
@@ -64,6 +81,9 @@ namespace Zehkaa.SpriteClasses
         private void HandleGroundTouch(KeyboardState kstate, Rectangle groundRectangle)
         {
             boundingRectangle = new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
+
+
+            Debug.WriteLine("z: " + boundingRectangle);
 
             if (boundingRectangle.Bottom >= groundRectangle.Top)
             {
@@ -86,17 +106,17 @@ namespace Zehkaa.SpriteClasses
             }
         }
 
-        private void HandleMovement(KeyboardState kstate, float updatedBallSpeed)
+        private void HandleMovement(KeyboardState kstate, float updatedSpeed)
         {
             if (ButtonPressUtils.IsMoveLeft(kstate))
             {
-                velocity.X = -updatedBallSpeed;
+                velocity.X = -updatedSpeed;
                 spriteEffect = SpriteEffects.FlipHorizontally;
             }
 
             if (ButtonPressUtils.IsMoveRight(kstate))
             {
-                velocity.X = updatedBallSpeed;
+                velocity.X = updatedSpeed;
                 spriteEffect = SpriteEffects.None;
             }
 
