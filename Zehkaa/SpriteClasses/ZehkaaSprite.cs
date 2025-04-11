@@ -19,7 +19,7 @@ namespace Zehkaa.SpriteClasses
         private Vector2 velocity;
         private bool isOnGround = false;
 
-        private float jumpStrength = -8f;
+        private float jumpStrength = 7f;
 
         private Rectangle boundingRectangle;
 
@@ -59,8 +59,10 @@ namespace Zehkaa.SpriteClasses
 
             Rectangle platformRectangle = platformSprite.GetBoundingBox();
             boundingRectangle = new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
-            if (boundingRectangle.Bottom <= platformRectangle.Top + 5 &&
-                boundingRectangle.Bottom >= platformRectangle.Top - 5 &&
+            
+            // Hit from top
+            if (boundingRectangle.Bottom <= platformRectangle.Top + 2 &&
+                boundingRectangle.Bottom >= platformRectangle.Top - 2 &&
                 boundingRectangle.Right > platformRectangle.Left &&
                 boundingRectangle.Left < platformRectangle.Right)
             {
@@ -69,6 +71,31 @@ namespace Zehkaa.SpriteClasses
 
                 position.X += platformSprite.GetVelocity().X;
                 position.Y = platformRectangle.Top - texture.Height;
+            }
+
+            // Hit from bottom
+            if (boundingRectangle.Top >= platformRectangle.Bottom - 5 &&
+                boundingRectangle.Top < platformRectangle.Bottom + 5 &&
+                boundingRectangle.Right > platformRectangle.Left &&
+                boundingRectangle.Left < platformRectangle.Right)
+            {
+                Debug.WriteLine("hi");
+
+                position.Y = platformRectangle.Bottom + 6;
+                velocity.Y = 0;
+            }
+
+            // TODO: Fix tomorrow :3
+            // Hit from left (can we combine left & right?)
+            // add the top/bottom checks too
+            if (
+                boundingRectangle.Right > platformRectangle.Left &&
+                boundingRectangle.Left < platformRectangle.Right)
+            {
+                Debug.WriteLine("hi");
+
+                position.Y = platformRectangle.Bottom + 6;
+                velocity.Y = 0;
             }
         }
 
@@ -119,7 +146,7 @@ namespace Zehkaa.SpriteClasses
 
             if (ButtonPressUtils.IsJump(kstate) && isOnGround)
             {
-                velocity.Y = jumpStrength;
+                velocity.Y -= jumpStrength;
                 isOnGround = false;
             }
         }
