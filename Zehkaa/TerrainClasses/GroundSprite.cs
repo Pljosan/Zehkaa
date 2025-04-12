@@ -3,21 +3,14 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Zehkaa.TerrainClasses
-{
-    internal class GroundSprite
+{ 
+    internal class GroundSprite : TerrainSprite
     {
         private Texture2D texture;
-        private Rectangle boundingRectangle;
 
-        public GroundSprite(Texture2D texture, GraphicsDeviceManager _graphics)
+        public GroundSprite(Texture2D texture, GraphicsDeviceManager _graphics) : base(new Rectangle(0, _graphics.PreferredBackBufferHeight - texture.Height, _graphics.PreferredBackBufferWidth, texture.Height))
         {
             this.texture = texture;
-            boundingRectangle = new Rectangle(0, _graphics.PreferredBackBufferHeight - texture.Height, _graphics.PreferredBackBufferWidth, texture.Height);
-        }
-
-        public Rectangle GetBoundingBox()
-        {
-            return boundingRectangle;
         }
 
         public void Draw(SpriteBatch spriteBatch, GraphicsDeviceManager _graphics)

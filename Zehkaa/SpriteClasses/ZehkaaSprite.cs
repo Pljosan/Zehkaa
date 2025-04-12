@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 using Zehkaa.TerrainClasses;
 using Zehkaa.Utils;
 
@@ -34,7 +35,8 @@ namespace Zehkaa.SpriteClasses
         }
 
         //TODO: add this to array of world sprites?
-        public void Update(GameTime gameTime, Rectangle groundRectangle, PlatformSprite platform)
+        // {Type.Ground -> [groundrectangle], Type.Platforms -> [platform1, platform2]}
+        public void Update(GameTime gameTime, Dictionary<TerrainType, LinkedList<TerrainSprite>> terrainObjects)
         {
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             float updatedSpeed = speed * delta;
@@ -48,8 +50,19 @@ namespace Zehkaa.SpriteClasses
 
             position += velocity;
 
-            HandleGroundTouch(kstate, groundRectangle);
-            HandlePlatformTouch(kstate, platform);
+            LinkedList<TerrainSprite> groundSprites;
+            terrainObjects.TryGetValue(TerrainType.Ground, out groundSprites);
+
+            LinkedList<TerrainSprite> platformSprites;
+            terrainObjects.TryGetValue(TerrainType.Platform, out platformSprites);
+
+
+            HandleGroundTouch(kstate, groundSprites.First.Value.GetBoundingBox());
+            foreach (var platform in platformSprites)
+            {
+                if (platform is PlatformSprite platformSprite)
+                    HandlePlatformTouch(kstate, platformSprite);
+            }
         }
 
         private void HandlePlatformTouch(KeyboardState kstate, PlatformSprite platformSprite)

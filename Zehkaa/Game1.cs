@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Zehkaa.SpriteClasses;
@@ -56,7 +58,17 @@ namespace Zehkaa
                 Exit();
 
             // TODO: Add your update logic here
-            zehkaaHimself.Update(gameTime, groundSprite.GetBoundingBox(), movingPlatform);
+            LinkedList<TerrainSprite> groundSprites = new LinkedList<TerrainSprite>();
+            groundSprites.AddLast(groundSprite);
+
+            LinkedList<TerrainSprite> platformSprites = new LinkedList<TerrainSprite>();
+            platformSprites.AddLast(movingPlatform);
+
+            Dictionary<TerrainType, LinkedList<TerrainSprite>> terrainSprites = new Dictionary<TerrainType, LinkedList<TerrainSprite>>();
+            terrainSprites.Add(TerrainType.Ground, groundSprites);
+            terrainSprites.Add(TerrainType.Platform, platformSprites);
+
+            zehkaaHimself.Update(gameTime, terrainSprites);
             movingPlatform.Update(gameTime);
 
             base.Update(gameTime);

@@ -5,7 +5,7 @@ using System;
 
 namespace Zehkaa.TerrainClasses
 {
-    internal class PlatformSprite
+    internal class PlatformSprite : TerrainSprite
     {
         private Texture2D texture;
         private Vector2 position;
@@ -13,16 +13,16 @@ namespace Zehkaa.TerrainClasses
         private float movementSpeed = 100f;
         private float movementI = 1;
 
-        public PlatformSprite(Texture2D texture, Vector2 startPosition, GraphicsDeviceManager _graphics)
+        public PlatformSprite(Texture2D texture, Vector2 startPosition, GraphicsDeviceManager _graphics) : base(new Rectangle((int)startPosition.X, (int)startPosition.Y, texture.Width, texture.Height))
         {
             this.texture = texture;
             this.position = startPosition;
             this.velocity = Vector2.Zero;
         }
 
-        public Rectangle GetBoundingBox()
+        public new Rectangle GetBoundingBox()
         {
-            return new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height); ;
+            return new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
         }
 
         public void Update(GameTime gameTime)
