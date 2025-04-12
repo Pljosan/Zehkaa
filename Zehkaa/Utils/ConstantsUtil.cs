@@ -9,5 +9,6 @@ namespace Zehkaa.Utils
     internal class ConstantsUtil
     {
         public static float GRAVITY = 9.8f;
+        public static float DELTA = 3.0f;
     }
 }

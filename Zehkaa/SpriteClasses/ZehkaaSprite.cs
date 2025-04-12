@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Zehkaa.TerrainClasses;
@@ -60,12 +58,7 @@ namespace Zehkaa.SpriteClasses
             Rectangle platformRectangle = platformSprite.GetBoundingBox();
             boundingRectangle = new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
             
-            // Hit from top
-            if (boundingRectangle.Bottom <= platformRectangle.Top + 2 &&
-                boundingRectangle.Bottom >= platformRectangle.Top - 2 &&
-                boundingRectangle.Right > platformRectangle.Left &&
-                boundingRectangle.Left < platformRectangle.Right)
-            {
+            if (CollisionDetectionUtils.IsCollisionFromTop(boundingRectangle, platformRectangle)) {
                 isOnGround = true;
                 velocity.Y = 0;
 
@@ -73,29 +66,22 @@ namespace Zehkaa.SpriteClasses
                 position.Y = platformRectangle.Top - texture.Height;
             }
 
-            // Hit from bottom
-            if (boundingRectangle.Top >= platformRectangle.Bottom - 5 &&
-                boundingRectangle.Top < platformRectangle.Bottom + 5 &&
-                boundingRectangle.Right > platformRectangle.Left &&
-                boundingRectangle.Left < platformRectangle.Right)
+            if (CollisionDetectionUtils.IsCollisionFromBottom(boundingRectangle, platformRectangle))
             {
-                Debug.WriteLine("hi");
-
-                position.Y = platformRectangle.Bottom + 6;
+                position.Y = platformRectangle.Bottom + ConstantsUtil.DELTA;
                 velocity.Y = 0;
             }
 
-            // TODO: Fix tomorrow :3
-            // Hit from left (can we combine left & right?)
-            // add the top/bottom checks too
-            if (
-                boundingRectangle.Right > platformRectangle.Left &&
-                boundingRectangle.Left < platformRectangle.Right)
+            if (CollisionDetectionUtils.IsCollisionFromLeft(boundingRectangle, platformRectangle))
             {
-                Debug.WriteLine("hi");
+                velocity.X = 0;
+                position.X = platformRectangle.Left - texture.Width - ConstantsUtil.DELTA;
+            }
 
-                position.Y = platformRectangle.Bottom + 6;
-                velocity.Y = 0;
+            if (CollisionDetectionUtils.IsCollisionFromRight(boundingRectangle, platformRectangle))
+            {
+                velocity.X = 0;
+                position.X = platformRectangle.Right + ConstantsUtil.DELTA;
             }
         }
 
